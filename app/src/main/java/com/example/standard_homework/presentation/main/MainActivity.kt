@@ -1,48 +1,37 @@
-package com.example.standard_homework
+package com.example.standard_homework.presentation.main
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.standard_homework.databinding.ActivityMainBinding
+import com.example.standard_homework.data.cardList
+import com.example.standard_homework.presentation.detail.DetailActivity
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var cardViewModel : CardViewModel ?= null
+
+    private val cardAdapter : MultiViewAdapter by lazy {
+        MultiViewAdapter {
+            cardList()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val dataList = listOf(
-            CardInfo(
-                CardInfo.BLUE_TYPE,
-                "Anderson",
-                "2423  3581  9503  2412",
-                "21 / 24", 3100.30
-            ),
-            CardInfo(
-                CardInfo.SKY_TYPE,
-                "Anderson",
-                "2423  3581  9503  2412",
-                "12 / 25",
-                3100.30
-            ),
-            CardInfo(
-                CardInfo.ORANGE_TYPE,
-                "Anderson",
-                "2423  3581  9503  2412",
-                "21 / 24",
-                3100.30
-            )
-        )
+        cardViewModel = ViewModelProvider(this, CardViewModelFactory()).get(CardViewModel::class.java)
 
-        val adapter = MultiViewAdapter(dataList)
-        adapter.itemClick = object : MultiViewAdapter.ItemClick {
+        cardAdapter.itemClick = object : MultiViewAdapter.ItemClick {
             override fun onClick(view: View, position: Int) {
-                val selectedItem = dataList[position]
+                val selectedItem = cardList()[position]
 
                 val intent = Intent(this@MainActivity, DetailActivity::class.java)
                 val bundle = Bundle().apply {
@@ -56,8 +45,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
-
+        with(binding.recyclerView) {
+            adapter = cardAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+        }
     }
 }
